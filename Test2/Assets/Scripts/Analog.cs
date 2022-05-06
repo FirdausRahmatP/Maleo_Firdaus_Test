@@ -45,7 +45,6 @@ public class Analog : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
         pointer = null;
         analog.SetActive(false);
         onAnalogUp?.Invoke();
-        onAnalogDrag?.Invoke(Vector2.zero);
     }
 
 }
