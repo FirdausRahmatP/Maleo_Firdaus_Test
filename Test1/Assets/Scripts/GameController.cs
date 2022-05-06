@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameController : MonoBehaviour
+public class GameController : Singleton<GameController>
 {
     public int score;
     void Start()
     {
+        UIController.SetScore(score);
         FindObjectOfType<GameField>().InitGameField(64, 64);
 
         int blockCount = 128;
@@ -47,13 +48,6 @@ public class GameController : MonoBehaviour
 
         AICharacter aiCharacter = FindObjectOfType<AICharacter>();
 
-        Queue<Vector3> queuePath = FindObjectOfType<AstarPathFinding>().GetPath(aiCharacter.transform.position, rewardPosition);
-
-        aiCharacter.SetPath(queuePath);
-    }
-
-    void Update()
-    {
-        FindObjectOfType<UIController>().SetScore(score);
+        aiCharacter.PathFind(aiCharacter.transform.position, rewardPosition);
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameField : MonoBehaviour
+public class GameField : Singleton<GameField>
 {
     public Cell[,] cells;
     public GameObject cellPrefab;
@@ -58,8 +58,8 @@ public class GameField : MonoBehaviour
 
     public void GetCellCoordinate(Vector3 pos, out int x, out int y)
     {
-        x = (int)(pos.x);
-        y = (int)(pos.z);
+        x = Mathf.RoundToInt(pos.x);
+        y = Mathf.RoundToInt(pos.z);
     }
 
     public void InitAICharacter(int x,int y)
@@ -72,6 +72,22 @@ public class GameField : MonoBehaviour
     {
         GameObject reward = Instantiate(rewardPrefab);
         reward.transform.position = GetCellPosition(x, y);
+        return reward;
+    }
+    public GameObject FindClosestReward(Vector3 from)
+    {
+        GameObject reward = null;
+        Reward[] rewards = FindObjectsOfType<Reward>();
+        float closestDistance = Mathf.Infinity;
+        foreach (var item in rewards)
+        {
+            float distance = Vector3.Distance(from, item.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                reward = item.gameObject;
+            }
+        }
         return reward;
     }
 }

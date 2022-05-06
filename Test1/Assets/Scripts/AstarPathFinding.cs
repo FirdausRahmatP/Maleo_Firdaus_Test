@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class AstarPathFinding : MonoBehaviour
+public class AstarPathFinding : Singleton<AstarPathFinding>
 {
     public class Node
     {
@@ -20,10 +22,15 @@ public class AstarPathFinding : MonoBehaviour
             this.y = cell.y;
         }
     }
-
-    public Queue<Vector3> GetPath(Vector3 fromPosition, Vector3 toPosition)
+    public Thread GetPathThread(Vector3 fromPosition, Vector3 toPosition, Action<Queue<Vector3>> onDone)
     {
-        GameField gameField = FindObjectOfType<GameField>();
+        Thread t = new Thread(() => GetPath(fromPosition, toPosition, onDone));
+        t.Start();
+        return t;
+    }
+    public void GetPath(Vector3 fromPosition, Vector3 toPosition, Action<Queue<Vector3>> onDone)
+    {
+        GameField gameField = GameField.Instance;
         var cells = gameField.cells;
 
         gameField.GetCellCoordinate(fromPosition, out int startX, out int startY);
@@ -80,7 +87,7 @@ public class AstarPathFinding : MonoBehaviour
         if(tried < 0)
         {
             Debug.LogError("Error in finding!");
-            return new Queue<Vector3>();
+            onDone?.Invoke(new Queue<Vector3>());
         }
 
         List<Node> rebuild = new List<Node>();
@@ -99,7 +106,7 @@ public class AstarPathFinding : MonoBehaviour
             positionQueue.Enqueue(gameField.GetCellPosition(nodes.x,nodes.y));
         }
 
-        return positionQueue;
+        onDone?.Invoke(positionQueue);
     }
 
     private bool Contains(int x,int y,List<Node> nodes)
